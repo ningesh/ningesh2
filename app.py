@@ -22,41 +22,41 @@ def dbClose():
     return
 
 
-application = Flask(__name__)
-application.secret_key = 'random string'
+app = Flask(__name__)
+app.secret_key = 'random string'
 
-application.config['UPLOADED_PHOTOS_DEST'] = 'static/upload/'
+app.config['UPLOADED_PHOTOS_DEST'] = 'static/upload/'
 photos = UploadSet('photos', IMAGES)
-configure_uploads(application, photos)
+configure_uploads(app, photos)
 #########################################################################################################################################
 #                                               Main initial page
 #########################################################################################################################################
-@application.route('/index')
+@app.route('/index')
 def index():
     return render_template('index1.html')
 #########################################################################################################################################
 #                                                   Index page
 #########################################################################################################################################
-@application.route('/about')
+@app.route('/about')
 def about():
     return render_template('about.html')
 #########################################################################################################################################
 #                                                   User page
 #########################################################################################################################################
-@application.route('/contact')
+@app.route('/contact')
 def contact():
     return render_template('contact.html')
 #########################################################################################################################################
 #                                                   User Logout
 #########################################################################################################################################
-@application.route('/logout')
+@app.route('/logout')
 def logout():
     session.pop('user')
     return redirect(url_for('login'))
 #########################################################################################################################################
 #                                                   User Registeration
 #########################################################################################################################################
-@application.route('/register', methods=["GET", "POST"])
+@app.route('/register', methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         try:
@@ -91,7 +91,7 @@ def register():
 #########################################################################################################################################
 #                                                   User Login
 #########################################################################################################################################
-@application.route('/', methods=["GET", "POST"])
+@app.route('/', methods=["GET", "POST"])
 def login():
     msg = ''
     if request.method == "POST":
@@ -121,7 +121,7 @@ def login():
 #########################################################################################################################################
 #                                                      Home page
 #########################################################################################################################################
-@application.route('/home.html')
+@app.route('/home.html')
 def home():
     if 'user' in session:
         return render_template('home.html', user=session['user'])
@@ -129,7 +129,7 @@ def home():
 #########################################################################################################################################
 #                                                   Plant disease
 #########################################################################################################################################
-@application.route('/plntds', methods=['GET', 'POST'])
+@app.route('/plntds', methods=['GET', 'POST'])
 def plntds():
     print('hi')
     if 'user' in session:
@@ -141,7 +141,7 @@ def plntds():
             # Save the file to ./uploads
             basepath = os.path.dirname(__file__)
             file_path = os.path.join(
-                basepath, 'static/upload', secure_filename(f.filename))
+                basepath, 'static/upload/', secure_filename(f.filename))
             f.save(file_path)
             fname = secure_filename(f.filename)
             # print("printing file name")
@@ -149,18 +149,14 @@ def plntds():
         
             from os import listdir
             from os.path import isfile, join
-            predict_dir_path = r'static/upload/'
-            onlyfiles = [f for f in listdir(
-                predict_dir_path) if isfile(join(predict_dir_path, f))]
-            # print(onlyfiles)
+            predict_dir_path = file_path
             
             import tensorflow
             from tensorflow.keras.preprocessing import image
             from tensorflow.keras.models import load_model
             model = load_model("VGG_plant.hp5")
             image_size = 224
-            # for file in onlyfiles:
-            img = image.load_img(predict_dir_path+str(fname),
+            img = image.load_img(predict_dir_path,
                                 target_size=(image_size, image_size))
             x = image.img_to_array(img)
             # print("printing X#######")
@@ -194,5 +190,5 @@ def plntds():
 
 
 if __name__ == "__main__":
-    application.run("0.0.0.0")
-    #application.run(debug=True)
+    app.run("0.0.0.0")
+    #app.run(debug=True)
